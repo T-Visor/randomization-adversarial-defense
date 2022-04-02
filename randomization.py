@@ -7,6 +7,8 @@ import torch
 import torchvision.transforms as T
 
 
+
+
 def img_transform(img_in, img_out=None):
     from PIL import Image
     import torchvision.transforms as T
@@ -15,7 +17,7 @@ def img_transform(img_in, img_out=None):
      
     margin_min = 50
     margin_max = 400
-    background = (0, 0, 64)
+    background = (231, 187, 0)
     
     orig_image = Image.open(img_in)
     rngs = np.random.default_rng()
@@ -27,9 +29,15 @@ def img_transform(img_in, img_out=None):
     
     new_image = Image.new(orig_image.mode, (new_width, new_height), background)
     new_image.paste(orig_image, (padding_margins[0],padding_margins[2]))
-    resized_imgs = [T.Resize(size=size)(new_image) for size in ([(150,150)])]
+    resized_imgs = [T.Resize(size=size)(new_image) for size in ([(1500,1500)])]
 
     if img_out is None:
         img_out = f"./img_samples/Trans_{str(uuid.uuid1())[0:8]}.jpg"
     resized_imgs[0].save(img_out)
     return resized_imgs[0]
+
+
+
+
+if __name__ == '__main__':
+    img_transform('Valkyrae-2.png', 'Valkyrae_randomized.png')
