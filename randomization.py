@@ -24,19 +24,14 @@ def main():
     source_folder = arguments.source[0]
     destination_folder = arguments.destination[0]
 
-    # This function always returns the same value,
-    # it's used so that we can get a generator object (iterable)
-    # and can be used in a map function.
-    def generate_destination_folder():
-        while True:
-            yield destination_folder
-    destination_folder_instance = generate_destination_folder()
-
     # Load all images from the directory
     images_found = list(map(str, glob.iglob(source_folder + '/**/*.png', recursive=True)))
 
     # Get all the target paths
-    target_paths = list(map(copy_tree, images_found, destination_folder_instance))
+    #target_paths = list(map(copy_tree, images_found, destination_folder_instance))
+    target_paths = []
+    for image in images_found:
+        target_paths.append(copy_tree(image, destination_folder)) 
 
     # Output the images with randomized padding to a new directory
     list(map(img_transform, images_found, target_paths))
@@ -46,10 +41,10 @@ def main():
 
 
 
-def copy_tree(source, destination):
+def copy_tree(source, destination_folder):
     source_path = Path(source)
     name_to_change = source_path.parts[0] # Get the first part of the file path
-    target_path = "/".join([part if part != name_to_change else destination
+    target_path = "/".join([part if part != name_to_change else destination_folder
                             for part in source_path.parts])[0:]
     return target_path
 
