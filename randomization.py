@@ -9,6 +9,7 @@ import argparse
 import sys
 import glob
 from pathlib import Path
+import os
 
 #https://stackoverflow.com/questions/22444147/python-change-part-single-directory-name-of-path
 
@@ -35,8 +36,11 @@ def main():
         target_path = "/".join([part if part != name_to_change else destination_folder 
                                 for part in source_path.parts])[0:]
         target_paths.append(target_path)
-
     print(target_paths)
+
+    list(map(img_transform, images, target_paths))
+
+
 
 
 def parse_command_line_arguments():
@@ -86,7 +90,11 @@ def img_transform(img_in, img_out=None):
 
     if img_out is None:
         img_out = f"./img_samples/Trans_{str(uuid.uuid1())[0:8]}.jpg"
+    else:
+        os.makedirs(os.path.dirname(img_out), exist_ok=True)
+
     resized_imgs[0].save(img_out)
+    print('complete!')
     return resized_imgs[0]
 
 
