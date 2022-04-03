@@ -8,6 +8,9 @@ from pathlib import Path
 import argparse
 import sys
 import glob
+from pathlib import Path
+
+#https://stackoverflow.com/questions/22444147/python-change-part-single-directory-name-of-path
 
 
 
@@ -20,16 +23,20 @@ def main():
     destination_folder = arguments.destination[0]
 
     # Load all images from the directory
-    images = map(str, glob.iglob(source_folder + '/**/*.png', recursive=True))
-    #images = []
+    all_images_found = map(str, glob.iglob(source_folder + '/**/*.png', recursive=True))
+    images = list(all_images_found)
 
-    #for image in glob.iglob(source_folder + '/**/*.png', recursive=True):
-    #    images.append(image)
-    #    print(image)
+    print(images)
 
-    print(list(images))
+    target_paths = []
+    for path in images:
+        source_path = Path(path)
+        name_to_change = source_path.parts[0] # Get the first part of the file path
+        target_path = "/".join([part if part != name_to_change else destination_folder 
+                                for part in source_path.parts])[0:]
+        target_paths.append(target_path)
 
-
+    print(target_paths)
 
 
 def parse_command_line_arguments():
