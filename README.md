@@ -2,17 +2,16 @@
 Applies randomized padding to images containing faces, serving as a data augmentation
 technique to train robust facial recognition systems.
 
----
 ## Test Environment
 - Python 3.10
 - Arch Linux
 
----
 ## Setup
 Install Python dependencies with the following command:
-```$ pip3 install -r requirements.txt``` 
+``` sh
+$ pip3 install -r requirements.txt
+``` 
 
----
 ## Usage
 
 ``` sh
