@@ -10,6 +10,7 @@ import sys
 import glob
 from pathlib import Path
 import os
+from functools import partial
 
 #https://stackoverflow.com/questions/22444147/python-change-part-single-directory-name-of-path
 
@@ -23,22 +24,34 @@ def main():
     source_folder = arguments.source[0]
     destination_folder = arguments.destination[0]
 
+    # This function always returns the same value,
+    # it's used so that we can get a generator object (iterable)
+    # and can be used in a map function.
+    def generate_destination_folder():
+        while True:
+            yield destination_folder
+    destination_folder_instance = generate_destination_folder()
+
     # Load all images from the directory
-    all_images_found = map(str, glob.iglob(source_folder + '/**/*.png', recursive=True))
-    images = list(all_images_found)
+    images_found = list(map(str, glob.iglob(source_folder + '/**/*.png', recursive=True)))
 
-    print(images)
+    # Get all the target paths
+    target_paths = list(map(copy_tree, images_found, destination_folder_instance))
 
-    target_paths = []
-    for path in images:
-        source_path = Path(path)
-        name_to_change = source_path.parts[0] # Get the first part of the file path
-        target_path = "/".join([part if part != name_to_change else destination_folder 
-                                for part in source_path.parts])[0:]
-        target_paths.append(target_path)
+    # Output the images with randomized padding to a new directory
+    list(map(img_transform, images_found, target_paths))
+
+    print(images_found)
     print(target_paths)
 
-    list(map(img_transform, images, target_paths))
+
+
+def copy_tree(source, destination):
+    source_path = Path(source)
+    name_to_change = source_path.parts[0] # Get the first part of the file path
+    target_path = "/".join([part if part != name_to_change else destination
+                            for part in source_path.parts])[0:]
+    return target_path
 
 
 
@@ -75,6 +88,7 @@ def img_transform(img_in, img_out=None):
     margin_min = 50
     margin_max = 400
     background_color = (231, 187, 0) # RGB value: yellowish-gold
+    image_size = (1500, 1500)
     
     orig_image = Image.open(img_in)
     rngs = np.random.default_rng()
@@ -86,7 +100,7 @@ def img_transform(img_in, img_out=None):
     
     new_image = Image.new(orig_image.mode, (new_width, new_height), background_color)
     new_image.paste(orig_image, (padding_margins[0],padding_margins[2]))
-    resized_imgs = [T.Resize(size=size)(new_image) for size in ([(1500,1500)])]
+    resized_imgs = [T.Resize(size=size)(new_image) for size in ([image_size])]
 
     if img_out is None:
         img_out = f"./img_samples/Trans_{str(uuid.uuid1())[0:8]}.jpg"
@@ -94,7 +108,6 @@ def img_transform(img_in, img_out=None):
         os.makedirs(os.path.dirname(img_out), exist_ok=True)
 
     resized_imgs[0].save(img_out)
-    print('complete!')
     return resized_imgs[0]
 
 
